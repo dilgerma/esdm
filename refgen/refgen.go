@@ -96,6 +96,34 @@ func generateCore(out map[string][]byte) error {
 	return nil
 }
 
+// generateKindBranches emits one snippet per kind of an extension
+// that defines several, reading each kind's fields from its allOf
+// branch. The snippet shape is the one core kinds use.
+func generateKindBranches(out map[string][]byte, extensionName string, root *yaml.Node, defs map[string]*yaml.Node) error {
+	allOfNode := mapValue(root, "allOf")
+	if allOfNode == nil {
+		return fmt.Errorf("missing kind.const and allOf")
+	}
+
+	for _, entry := range allOfNode.Content {
+		kindName := kindFromBranch(entry)
+		if kindName == "" {
+			continue
+		}
+		thenNode := mapValue(entry, "then")
+		if thenNode == nil {
+			continue
+		}
+		snippet := coreKindSchema(root, kindName, thenNode, defs)
+		data, err := marshalNode(snippet)
+		if err != nil {
+			return err
+		}
+		out[path.Join("reference", "extensions", extensionName, kindName+".yaml")] = data
+	}
+	return nil
+}
+
 // coreKindSchema returns the snippet for one core kind. When the
 // kind's `then` block is a mapping (i.e. the kind has its own fields),
 // the snippet is just that block - the common top-level shape is
@@ -178,7 +206,14 @@ func generateExtensions(out map[string][]byte) error {
 		}
 		kindConst := mapValue(kindEntry, "const")
 		if kindConst == nil {
-			return fmt.Errorf("%s: missing kind.const", extension.Name)
+			// An extension with several kinds pins them through an
+			// enum and one allOf branch per kind, the way the core
+			// does, so each kind gets its own snippet.
+			err := generateKindBranches(out, extension.Name, root, defs)
+			if err != nil {
+				return fmt.Errorf("%s: %w", extension.Name, err)
+			}
+			continue
 		}
 		kindName := kindConst.Value
 

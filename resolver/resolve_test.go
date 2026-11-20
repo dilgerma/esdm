@@ -818,6 +818,48 @@ sentences:
 		assertHasUnresolved(t, diagnostics, "phantom-domain")
 	})
 
+	t.Run("indexes event-modeling documents under Extensions and flags a missing bounded context", func(t *testing.T) {
+		dir := t.TempDir()
+		parents := writeParents(t, dir)
+		path := filepath.Join(dir, "event-modeling.esdm.yaml")
+		writeFile(t, path, `apiVersion: schema.esdm.io/event-modeling/v1
+kind: event-model
+name: orders
+scope:
+  domain: commerce
+timelines:
+  - name: ordering
+    boundedContext: ordering
+    slices:
+      - place-order
+---
+apiVersion: schema.esdm.io/event-modeling/v1
+kind: screen
+name: checkout
+scope:
+  domain: commerce
+  boundedContext: phantom-context
+---
+apiVersion: schema.esdm.io/event-modeling/v1
+kind: slice
+name: place-order
+scope:
+  domain: commerce
+  boundedContext: ordering
+type: state-change
+command: place-order
+dynamicConsistencyBoundary: place-order-boundary
+events:
+  - order-placed
+`)
+		m, diagnostics := resolver.Resolve(parseAll(t, parents, path))
+
+		assert.Contains(t, m.Extensions.EventModeling.EventModels, "commerce/orders")
+		assert.Contains(t, m.Extensions.EventModeling.Slices, "commerce/ordering/place-order")
+		assert.Contains(t, m.Extensions.EventModeling.Screens, "commerce/phantom-context/checkout")
+		assertHasUnresolved(t, diagnostics, "phantom-context")
+	})
+
 	t.Run("indexes a given-when-then feature document under Extensions", func(t *testing.T) {
 		dir := t.TempDir()
 		parents := writeParents(t, dir)

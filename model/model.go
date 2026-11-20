@@ -41,6 +41,7 @@ type Model struct {
 type Extensions struct {
 	DomainStorytelling DomainStorytellingIndex
 	GivenWhenThen      GivenWhenThenIndex
+	EventModeling      EventModelingIndex
 }
 
 // DomainStorytellingIndex groups every entity kind the
@@ -55,6 +56,15 @@ type DomainStorytellingIndex struct {
 // only Features (kind: feature).
 type GivenWhenThenIndex struct {
 	Features map[string]FeatureView
+}
+
+// EventModelingIndex groups every entity kind the
+// event-modeling extension schema defines: event models,
+// slices, and screens.
+type EventModelingIndex struct {
+	EventModels map[string]EventModelView
+	Slices      map[string]SliceView
+	Screens     map[string]ScreenView
 }
 
 // NewModel returns an empty Model with all its maps
@@ -85,6 +95,11 @@ func NewModel() *Model {
 			},
 			GivenWhenThen: GivenWhenThenIndex{
 				Features: make(map[string]FeatureView),
+			},
+			EventModeling: EventModelingIndex{
+				EventModels: make(map[string]EventModelView),
+				Slices:      make(map[string]SliceView),
+				Screens:     make(map[string]ScreenView),
 			},
 		},
 	}

@@ -28,6 +28,7 @@ func TestFacadesMatchSchema(t *testing.T) {
 	coreSchema := parseSchemaBytes(t, schema.Core())
 	extensionSchema := parseSchemaBytes(t, extensionBytes(t, "domain-storytelling"))
 	givenWhenThenSchema := parseSchemaBytes(t, extensionBytes(t, "given-when-then"))
+	eventModelingSchema := parseSchemaBytes(t, extensionBytes(t, "event-modeling"))
 
 	cases := []struct {
 		name   string
@@ -55,6 +56,9 @@ func TestFacadesMatchSchema(t *testing.T) {
 		{name: "ExternalSystemView", facade: model.ExternalSystemView{}, kind: "external-system", schema: coreSchema},
 		{name: "DomainStoryView", facade: model.DomainStoryView{}, kind: "domain-story", schema: extensionSchema},
 		{name: "FeatureView", facade: model.FeatureView{}, kind: "feature", schema: givenWhenThenSchema},
+		{name: "EventModelView", facade: model.EventModelView{}, kind: "event-model", schema: eventModelingSchema},
+		{name: "SliceView", facade: model.SliceView{}, kind: "slice", schema: eventModelingSchema},
+		{name: "ScreenView", facade: model.ScreenView{}, kind: "screen", schema: eventModelingSchema},
 	}
 
 	for _, c := range cases {

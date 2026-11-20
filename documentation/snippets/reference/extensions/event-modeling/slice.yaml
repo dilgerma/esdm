@@ -1,0 +1,100 @@
+properties:
+    scope:
+        type: object
+        properties:
+            domain:
+                type: string
+                pattern: "^[a-z][a-z0-9-]*$"
+            boundedContext:
+                type: string
+                pattern: "^[a-z][a-z0-9-]*$"
+        required: [domain, boundedContext]
+        additionalProperties: false
+    type:
+        type: string
+        enum: [state-change, state-view, automation, translation]
+    screen:
+        type: string
+        pattern: "^[a-z][a-z0-9-]*$"
+    actors:
+        type: array
+        minItems: 1
+        items:
+            type: string
+            pattern: "^[a-z][a-z0-9-]*$"
+    command:
+        type: string
+        pattern: "^[a-z][a-z0-9-]*$"
+    dynamicConsistencyBoundary:
+        type: string
+        pattern: "^[a-z][a-z0-9-]*$"
+    events:
+        type: array
+        minItems: 1
+        items:
+            type: string
+            pattern: "^[a-z][a-z0-9-]*$"
+    readModel:
+        type: string
+        pattern: "^[a-z][a-z0-9-]*$"
+    query:
+        type: string
+        pattern: "^[a-z][a-z0-9-]*$"
+    policy:
+        type: string
+        pattern: "^[a-z][a-z0-9-]*$"
+    externalSystem:
+        type: string
+        pattern: "^[a-z][a-z0-9-]*$"
+required: [scope, type]
+allOf:
+    - if:
+        properties:
+            type:
+                const: state-change
+        required: [type]
+      then:
+        required: [command, dynamicConsistencyBoundary, events]
+        not:
+            anyOf:
+                - required: [readModel]
+                - required: [query]
+                - required: [policy]
+                - required: [externalSystem]
+    - if:
+        properties:
+            type:
+                const: state-view
+        required: [type]
+      then:
+        required: [events, readModel]
+        not:
+            anyOf:
+                - required: [command]
+                - required: [dynamicConsistencyBoundary]
+                - required: [policy]
+                - required: [externalSystem]
+    - if:
+        properties:
+            type:
+                const: automation
+        required: [type]
+      then:
+        required: [readModel, policy, command, dynamicConsistencyBoundary, events]
+        not:
+            anyOf:
+                - required: [screen]
+                - required: [externalSystem]
+    - if:
+        properties:
+            type:
+                const: translation
+        required: [type]
+      then:
+        required: [externalSystem, command, dynamicConsistencyBoundary, events]
+        not:
+            anyOf:
+                - required: [screen]
+                - required: [readModel]
+                - required: [query]
+                - required: [policy]

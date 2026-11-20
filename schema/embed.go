@@ -34,6 +34,7 @@ const currentVersion = "v1"
 //
 //go:embed core
 //go:embed domain-storytelling
+//go:embed event-modeling
 //go:embed given-when-then
 var schemaFS embed.FS
 

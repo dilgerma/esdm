@@ -174,6 +174,47 @@ func KeyForGivenWhenThenDocument(view DocumentViewBase, kind string) (string, bo
 	return "", false
 }
 
+// EventModelKey is the key for an event model. Event
+// models are domain-scoped: a timeline can run across
+// Bounded Contexts.
+func EventModelKey(domain, name string) string {
+	return domain + "/" + name
+}
+
+// SliceKey is the key for a slice. Slices are
+// bounded-context-scoped.
+func SliceKey(domain, boundedContext, name string) string {
+	return domain + "/" + boundedContext + "/" + name
+}
+
+// ScreenKey mirrors SliceKey.
+func ScreenKey(domain, boundedContext, name string) string {
+	return domain + "/" + boundedContext + "/" + name
+}
+
+// KeyForEventModelingDocument builds the composite key for
+// an event-modeling document by kind. Returns ("", false)
+// when the document has no readable name or the kind is not
+// one this extension defines.
+func KeyForEventModelingDocument(view DocumentViewBase, kind string) (string, bool) {
+	name, ok := view.Name().Text()
+	if !ok {
+		return "", false
+	}
+	scope := view.Field("scope")
+	domain := ScopeText(scope, "domain")
+
+	switch kind {
+	case "event-model":
+		return EventModelKey(domain, name), true
+	case "slice":
+		return SliceKey(domain, ScopeText(scope, "boundedContext"), name), true
+	case "screen":
+		return ScreenKey(domain, ScopeText(scope, "boundedContext"), name), true
+	}
+	return "", false
+}
+
 // KeyForCoreDocument returns the composite key for any
 // core-schema document, dispatching on kind. Returns
 // ("", false) when the document has no readable name.
@@ -385,4 +426,16 @@ func (m *Model) FindCommandsByName(name string) []CommandView {
 		}
 	}
 	return out
+}
+
+// LookupSlice returns the slice by domain, BC, and name.
+func (m *Model) LookupSlice(domain, boundedContext, name string) (SliceView, bool) {
+	v, ok := m.Extensions.EventModeling.Slices[SliceKey(domain, boundedContext, name)]
+	return v, ok
+}
+
+// LookupScreen returns the screen by domain, BC, and name.
+func (m *Model) LookupScreen(domain, boundedContext, name string) (ScreenView, bool) {
+	v, ok := m.Extensions.EventModeling.Screens[ScreenKey(domain, boundedContext, name)]
+	return v, ok
 }

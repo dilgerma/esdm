@@ -176,6 +176,110 @@ sentences:
 		assert.Empty(t, diagnostics)
 	})
 
+	t.Run("accepts valid event-modeling documents of every kind without diagnostics", func(t *testing.T) {
+		path := writeTempFile(t, `apiVersion: schema.esdm.io/event-modeling/v1
+kind: event-model
+name: orders
+scope:
+  domain: commerce
+timelines:
+  - name: ordering
+    boundedContext: ordering
+    slices:
+      - place-order
+      - orders-list
+---
+apiVersion: schema.esdm.io/event-modeling/v1
+kind: screen
+name: checkout
+scope:
+  domain: commerce
+  boundedContext: ordering
+actors:
+  - customer
+shows:
+  - orders
+triggers:
+  - place-order
+---
+apiVersion: schema.esdm.io/event-modeling/v1
+kind: slice
+name: place-order
+scope:
+  domain: commerce
+  boundedContext: ordering
+type: state-change
+screen: checkout
+command: place-order
+dynamicConsistencyBoundary: place-order-boundary
+events:
+  - order-placed
+---
+apiVersion: schema.esdm.io/event-modeling/v1
+kind: slice
+name: orders-list
+scope:
+  domain: commerce
+  boundedContext: ordering
+type: state-view
+events:
+  - order-placed
+readModel: orders
+query: orders-query
+`)
+
+		parsed, diagnostics, err := parser.Parse(path)
+		require.NoError(t, err)
+		require.NotNil(t, parsed)
+		assert.Empty(t, diagnostics)
+	})
+
+	t.Run("rejects an event-modeling slice that carries what its type cannot have or lacks what it needs", func(t *testing.T) {
+		cases := map[string]string{
+			"a state-change slice without a command": `type: state-change
+dynamicConsistencyBoundary: place-order-boundary
+events: [order-placed]`,
+			"a state-change slice with a read model": `type: state-change
+command: place-order
+dynamicConsistencyBoundary: place-order-boundary
+events: [order-placed]
+readModel: orders`,
+			"a state-view slice with a command": `type: state-view
+command: place-order
+events: [order-placed]
+readModel: orders`,
+			"an automation without a policy": `type: automation
+readModel: orders
+command: ship-order
+dynamicConsistencyBoundary: ship-order-boundary
+events: [order-shipped]`,
+			"a translation with a screen": `type: translation
+screen: checkout
+externalSystem: payment-provider
+command: record-payment
+dynamicConsistencyBoundary: record-payment-boundary
+events: [payment-recorded]`,
+			"a slice of an unknown type": `type: story
+events: [order-placed]`,
+		}
+
+		for name, body := range cases {
+			t.Run(name, func(t *testing.T) {
+				path := writeTempFile(t, `apiVersion: schema.esdm.io/event-modeling/v1
+kind: slice
+name: some-slice
+scope:
+  domain: commerce
+  boundedContext: ordering
+`+body+"\n")
+
+				_, diagnostics, err := parser.Parse(path)
+				require.NoError(t, err)
+				assert.NotEmpty(t, diagnostics)
+			})
+		}
+	})
+
 	t.Run("accepts a valid given-when-then aggregate feature without diagnostics", func(t *testing.T) {
 		path := writeTempFile(t, `apiVersion: schema.esdm.io/given-when-then/v1
 kind: feature

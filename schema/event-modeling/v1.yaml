@@ -1,0 +1,309 @@
+# Copyright (c) 2026 the native web GmbH. All rights reserved.
+#
+# Licensed under the MIT license.
+# Full terms: https://www.esdm.io/introduction/license/
+# This notice must not be removed.
+
+# Extension schema for Event Modeling (Adam Dymitruk).
+#
+# An Event Modeling blueprint tells a system as a timeline: screens the
+# user acts on, commands, events, and read models the screens show,
+# cut into vertical slices. The core schema already describes the
+# commands, events, read models, queries, policies and actors; what it
+# cannot say is the shape of the blueprint itself. This extension adds
+# exactly that, with three kinds: `event-model` (the timeline, one
+# entry per chapter listing its slices in order), `slice` (one vertical
+# slice of a given type) and `screen` (what the user sees and does).
+#
+# Extension documents refer to core documents by bare name and do not
+# duplicate their content: a slice names the command, events, and read
+# model it is made of, a screen names the read models it shows and the
+# commands it triggers. Event Modeling does not need aggregates, so a
+# slice's command is addressed through its dynamic consistency
+# boundary, and its events are the Bounded Context's events.
+#
+# For the extension mechanism (URL layout, dispatch on `apiVersion`,
+# symmetric path structure for core and extensions) see the header
+# comment of the core schema document.
+#
+# Modeling-rule conventions mirror the core: that every reference
+# resolves, that a slice's events are the events its command
+# publishes, and that a slice appears on the timeline are modeling
+# rules – checked by tooling, not by JSON Schema. `minItems: 1` is
+# applied uniformly: a present-but-empty list is noise rather than a
+# modeling statement, so lists without content are omitted entirely
+# instead of written as `[]`.
+#
+# File convention: documents that follow this schema are stored as
+# `*.esdm.yaml` files, the same suffix as core documents; `kind`
+# disambiguates which schema each document must validate against.
+# Multiple documents may share one file, separated by `---`. The
+# `x-esdm-file-suffix` and `x-esdm-document-separator` fields below
+# expose these conventions mechanically.
+#
+# Project layout: this extension lives under the shared `schemas/`
+# directory next to the core schema, at `schemas/event-modeling/v1.yaml`.
+# The `x-esdm-project-layout` field restates the convention so
+# generators can place extension schemas consistently without guessing.
+# See the core schema for the full layout description.
+$id: "https://schema.esdm.io/event-modeling/v1"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+# Per-schema SemVer revision; see the core schema for the rationale.
+# Extension revisions move independently of the core revision, mirroring
+# how extension `$id`s move independently of `core/v1`.
+x-esdm-schema-revision: "1.0.0"
+x-esdm-file-suffix: ".esdm.yaml"
+x-esdm-document-separator: "---"
+x-esdm-project-layout:
+  schemas-directory: "schemas"
+  schema-path-template: "schemas/{name}/{version}.yaml"
+description: "Extension schema for Event Modeling (Adam Dymitruk). An `event-model` document is the timeline of a domain: its `timelines` are the chapters, each listing the slices of one Bounded Context in order. A `slice` document is one vertical slice of a given `type` – `state-change`, `state-view`, `automation`, or `translation` – and names the core documents it is made of: the command and the dynamic consistency boundary that decides it, the events it publishes or projects, the read model, the query, the policy, or the external system. A `screen` document is what the user sees and does: the read models it `shows`, the commands it `triggers`, and the actors who use it. Extension documents refer to core documents by bare name and resolve them in their own scope. Whether every reference resolves, whether a slice's events are the events its command publishes, and whether a slice appears on the timeline are modeling rules the schema does not enforce, mirroring the core's convention."
+
+$defs:
+  name:
+    # Inlined rather than `$ref`-ed into the core so the extension
+    # document validates in isolation. Same pattern as the core's
+    # `$defs/name`; the duplication is deliberate.
+    type: string
+    pattern: "^[a-z][a-z0-9-]*$"
+
+  scopeDomain:
+    # Inlined for the same reason as `name`. Same shape as the core's
+    # `scopeDomain`.
+    type: object
+    properties:
+      domain:
+        $ref: "#/$defs/name"
+    required: [domain]
+    additionalProperties: false
+
+  scopeBoundedContext:
+    # Inlined for the same reason as `name`. Same shape as the core's
+    # `scopeBoundedContext`.
+    type: object
+    properties:
+      domain:
+        $ref: "#/$defs/name"
+      boundedContext:
+        $ref: "#/$defs/name"
+    required: [domain, boundedContext]
+    additionalProperties: false
+
+  nameList:
+    # A non-empty list of bare names. Each kind uses it for the
+    # references it holds; what the names refer to is fixed by the
+    # field they sit in.
+    type: array
+    minItems: 1
+    items:
+      $ref: "#/$defs/name"
+
+type: object
+properties:
+  apiVersion:
+    const: schema.esdm.io/event-modeling/v1
+  kind:
+    type: string
+    enum:
+      - event-model
+      - slice
+      - screen
+  name:
+    $ref: "#/$defs/name"
+  description:
+    type: string
+  metadata:
+    # Mirrors the core's metadata shape: `labels` for tag-like
+    # identifiers, `annotations` for free-form tooling and provenance
+    # data. Non-semantic; nothing in the rest of the schema reads them.
+    type: object
+    properties:
+      labels:
+        type: object
+        additionalProperties:
+          type: string
+      annotations:
+        type: object
+        additionalProperties:
+          type: string
+    additionalProperties: false
+required: [apiVersion, kind, name]
+unevaluatedProperties: false
+
+allOf:
+  - if:
+      properties:
+        kind:
+          const: event-model
+      required: [kind]
+    then:
+      # The timeline of a domain: the chapters of the blueprint, left
+      # to right. An event model carries no content of its own; it
+      # orders slices, which carry the content. Domain-scoped because a
+      # timeline can run across Bounded Contexts, one chapter per
+      # context.
+      properties:
+        scope:
+          $ref: "#/$defs/scopeDomain"
+        timelines:
+          # The chapters in reading order. `minItems: 1` because an
+          # event model without a chapter is not a timeline yet.
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              name:
+                # Unique among the model's timelines; the chapter's
+                # own identifier, not a reference.
+                $ref: "#/$defs/name"
+              description:
+                type: string
+              boundedContext:
+                # The Bounded Context the chapter's slices live in.
+                # It fixes the resolution context of `slices`, the
+                # way a scope fixes the resolution context of bare
+                # names elsewhere. Required, so a slice name is never
+                # ambiguous.
+                $ref: "#/$defs/name"
+              slices:
+                # Bare slice names in the order they happen. The same
+                # slice appears on at most one timeline, once.
+                $ref: "#/$defs/nameList"
+            required: [name, boundedContext, slices]
+            additionalProperties: false
+      required: [scope, timelines]
+
+  - if:
+      properties:
+        kind:
+          const: screen
+      required: [kind]
+    then:
+      # What the user sees and does at one point of the timeline. The
+      # screen carries no layout or fields: it ties the read models it
+      # shows to the commands it triggers, which is what makes a
+      # state-change or state-view slice a story a person can follow.
+      properties:
+        scope:
+          $ref: "#/$defs/scopeBoundedContext"
+        actors:
+          # Core actors, by bare name, who use the screen.
+          $ref: "#/$defs/nameList"
+        shows:
+          # Read models, by bare name, whose content the screen
+          # displays.
+          $ref: "#/$defs/nameList"
+        triggers:
+          # Commands, by bare name, the user can issue from the screen.
+          $ref: "#/$defs/nameList"
+      required: [scope]
+
+  - if:
+      properties:
+        kind:
+          const: slice
+      required: [kind]
+    then:
+      # One vertical slice: everything that has to change together for
+      # one piece of behavior. Which references a slice carries depends
+      # on its `type`; the branches below require what the type needs
+      # and forbid what it cannot have, so a slice reads the same way
+      # on every board.
+      properties:
+        scope:
+          $ref: "#/$defs/scopeBoundedContext"
+        type:
+          # `state-change` – a user acts: screen, command, events.
+          # `state-view`   – the system shows: events, read model,
+          #                  screen.
+          # `automation`   – the system acts: read model (the
+          #                  to-do list), policy, command, events.
+          # `translation`  – the outside world acts: external system,
+          #                  command, events.
+          type: string
+          enum: [state-change, state-view, automation, translation]
+        screen:
+          # The screen of a `state-change` or `state-view` slice.
+          $ref: "#/$defs/name"
+        actors:
+          # Core actors, by bare name, involved in the slice.
+          $ref: "#/$defs/nameList"
+        command:
+          # The command, resolved within `dynamicConsistencyBoundary`.
+          $ref: "#/$defs/name"
+        dynamicConsistencyBoundary:
+          # The boundary that decides `command`. Event Modeling needs
+          # no aggregate, so the command is addressed through the
+          # boundary of its decision, one per command.
+          $ref: "#/$defs/name"
+        events:
+          # Events, by bare name, of the slice's Bounded Context: the
+          # ones the command publishes, or the ones the read model is
+          # projected from.
+          $ref: "#/$defs/nameList"
+        readModel:
+          $ref: "#/$defs/name"
+        query:
+          # The query a screen uses to read `readModel`.
+          $ref: "#/$defs/name"
+        policy:
+          # The policy of an `automation` slice, resolved within the
+          # slice's domain.
+          $ref: "#/$defs/name"
+        externalSystem:
+          # The external system of a `translation` slice, resolved
+          # within the slice's domain.
+          $ref: "#/$defs/name"
+      required: [scope, type]
+      allOf:
+        - if:
+            properties:
+              type:
+                const: state-change
+            required: [type]
+          then:
+            required: [command, dynamicConsistencyBoundary, events]
+            not:
+              anyOf:
+                - required: [readModel]
+                - required: [query]
+                - required: [policy]
+                - required: [externalSystem]
+        - if:
+            properties:
+              type:
+                const: state-view
+            required: [type]
+          then:
+            required: [events, readModel]
+            not:
+              anyOf:
+                - required: [command]
+                - required: [dynamicConsistencyBoundary]
+                - required: [policy]
+                - required: [externalSystem]
+        - if:
+            properties:
+              type:
+                const: automation
+            required: [type]
+          then:
+            required: [readModel, policy, command, dynamicConsistencyBoundary, events]
+            not:
+              anyOf:
+                - required: [screen]
+                - required: [externalSystem]
+        - if:
+            properties:
+              type:
+                const: translation
+            required: [type]
+          then:
+            required: [externalSystem, command, dynamicConsistencyBoundary, events]
+            not:
+              anyOf:
+                - required: [screen]
+                - required: [readModel]
+                - required: [query]
+                - required: [policy]

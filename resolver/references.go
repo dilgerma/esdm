@@ -138,6 +138,9 @@ func resolveReferences(m *model.Model) []diag.Diagnostic {
 	}
 
 	out = append(out, checkScopes(m, m.Extensions.DomainStorytelling.Stories)...)
+	out = append(out, checkScopes(m, m.Extensions.EventModeling.EventModels)...)
+	out = append(out, checkScopes(m, m.Extensions.EventModeling.Slices)...)
+	out = append(out, checkScopes(m, m.Extensions.EventModeling.Screens)...)
 
 	return out
 }

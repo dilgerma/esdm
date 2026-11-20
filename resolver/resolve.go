@@ -13,6 +13,7 @@ const (
 	coreAPIVersion               = "schema.esdm.io/core/v1"
 	domainStorytellingAPIVersion = "schema.esdm.io/domain-storytelling/v1"
 	givenWhenThenAPIVersion      = "schema.esdm.io/given-when-then/v1"
+	eventModelingAPIVersion      = "schema.esdm.io/event-modeling/v1"
 )
 
 // Resolve collects all documents from the parsed files,
@@ -99,6 +100,8 @@ func Resolve(files []*parser.ParsedFile) (*model.Model, []diag.Diagnostic) {
 				dispatchDomainStorytelling(m, document, kind, key)
 			case givenWhenThenAPIVersion:
 				dispatchGivenWhenThen(m, document, kind, key)
+			case eventModelingAPIVersion:
+				dispatchEventModeling(m, document, kind, key)
 			default:
 				// Unknown apiVersion - already flagged by
 				// the parser; skip indexing.
@@ -131,6 +134,8 @@ func compositeKey(apiVersion string, document model.DocumentViewBase, kind strin
 		return domain + "/" + name, true
 	case givenWhenThenAPIVersion:
 		return model.KeyForGivenWhenThenDocument(document, kind)
+	case eventModelingAPIVersion:
+		return model.KeyForEventModelingDocument(document, kind)
 	}
 	return "", false
 }
@@ -199,5 +204,19 @@ func dispatchGivenWhenThen(m *model.Model, document model.DocumentViewBase, kind
 	switch kind {
 	case "feature":
 		m.Extensions.GivenWhenThen.Features[key] = model.FeatureView{DocumentViewBase: document}
+	}
+}
+
+// dispatchEventModeling places an event-modeling-apiVersion
+// document into the matching Extensions map. Unknown kinds
+// are ignored for the same reason as in dispatchCore.
+func dispatchEventModeling(m *model.Model, document model.DocumentViewBase, kind, key string) {
+	switch kind {
+	case "event-model":
+		m.Extensions.EventModeling.EventModels[key] = model.EventModelView{DocumentViewBase: document}
+	case "slice":
+		m.Extensions.EventModeling.Slices[key] = model.SliceView{DocumentViewBase: document}
+	case "screen":
+		m.Extensions.EventModeling.Screens[key] = model.ScreenView{DocumentViewBase: document}
 	}
 }

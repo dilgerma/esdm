@@ -38,6 +38,7 @@ func TestExtensions(t *testing.T) {
 		}
 
 		assert.Contains(t, names, "domain-storytelling")
+		assert.Contains(t, names, "event-modeling")
 	})
 
 	t.Run("returns extensions in deterministic order", func(t *testing.T) {
@@ -67,6 +68,7 @@ func TestFiles(t *testing.T) {
 
 		assert.Contains(t, paths, "core/v1.yaml")
 		assert.Contains(t, paths, "domain-storytelling/v1.yaml")
+		assert.Contains(t, paths, "event-modeling/v1.yaml")
 	})
 
 	t.Run("returns files in deterministic, sorted order", func(t *testing.T) {
@@ -118,5 +120,6 @@ func TestAPIVersions(t *testing.T) {
 
 		assert.Contains(t, versions, "schema.esdm.io/core/v1")
 		assert.Contains(t, versions, "schema.esdm.io/domain-storytelling/v1")
+		assert.Contains(t, versions, "schema.esdm.io/event-modeling/v1")
 	})
 }

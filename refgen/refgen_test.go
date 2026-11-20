@@ -33,6 +33,10 @@ func TestSnippets(t *testing.T) {
 
 		assert.Contains(t, snippets, "reference/extensions/given-when-then/feature.yaml")
 		assert.Contains(t, snippets, "reference/extensions/domain-storytelling/domain-story.yaml")
+
+		for _, kind := range []string{"event-model", "slice", "screen"} {
+			assert.Contains(t, snippets, "reference/extensions/event-modeling/"+kind+".yaml")
+		}
 	})
 
 	t.Run("contains the scenario variant snippets", func(t *testing.T) {
