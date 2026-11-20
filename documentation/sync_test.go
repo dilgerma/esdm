@@ -92,6 +92,33 @@ func TestDomainStorytellingReference(t *testing.T) {
 	})
 }
 
+// TestEventModelingReference checks the event-model.md, slice.md and
+// screen.md pages as a single surface. The schema is one document
+// with three kinds, split across three reference pages; the test
+// treats the three as the union they are.
+func TestEventModelingReference(t *testing.T) {
+	t.Parallel()
+
+	document := loadExtension(t, "event-modeling")
+	index := newSchemaIndex(document)
+	inventory := index.inventory(document)
+
+	var pages []string
+	for _, kind := range []string{"event-model", "slice", "screen"} {
+		pages = append(pages, readReference(t, filepath.Join("docs", "extensions", "event-modeling", "reference", kind+".md")))
+	}
+	combined := strings.Join(pages, "\n")
+	where := "extensions/event-modeling/reference (event-model.md + slice.md + screen.md)"
+
+	t.Run("mentions every common field", func(t *testing.T) {
+		assertCommonFields(t, combined, where)
+	})
+
+	t.Run("mentions every schema field and enum value", func(t *testing.T) {
+		assertInventory(t, combined, inventory, where)
+	})
+}
+
 // TestReferenceSnippetsAreUpToDate makes sure the YAML excerpts the
 // reference pages embed via pymdownx.snippets are exactly what
 // `go run ./cmd/refgen` would produce against the embedded schemas.

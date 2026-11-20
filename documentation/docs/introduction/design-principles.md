@@ -16,7 +16,7 @@ When the schema changes in a non-breaking way, the schema revision goes up but t
 
 ## Extensions Sit Alongside the Core, Not Inside It
 
-Beyond the core vocabulary, ESDM defines **extensions** – independent schemas that describe artifacts the core leaves out. The Given-When-Then extension models behavioral scenarios. The Domain Storytelling extension captures discovery stories.
+Beyond the core vocabulary, ESDM defines **extensions** – independent schemas that describe artifacts the core leaves out. The Given-When-Then extension models behavioral scenarios. The Domain Storytelling extension captures discovery stories. The Event Modeling extension captures the blueprint of a system as a timeline of slices and screens.
 
 Crucially, extensions do not inject kinds into the core. A core document validates against the core schema and only the core schema; an extension document validates against its own. That asymmetry is what lets us add new extensions over time without ever touching the core.
 

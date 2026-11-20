@@ -1,0 +1,13 @@
+apiVersion: schema.esdm.io/core/v1
+kind: event
+name: order-placed
+scope:
+  domain: shop
+  boundedContext: ordering
+data:
+  type: object
+  properties:
+    orderId: { type: string }
+    product: { type: string }
+    quantity: { type: integer }
+  required: [orderId, product, quantity]

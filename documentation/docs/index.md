@@ -64,7 +64,7 @@ You're building tooling â€“ validators, generators, transformers, IDE plugins â€
 
 - **[Extensions](/extensions/overview.md)**
 
-    Given-When-Then and Domain Storytelling, each with its own schema.
+    Given-When-Then, Domain Storytelling, and Event Modeling, each with its own schema.
 
 ### Already know ESDM, just need a lookup
 

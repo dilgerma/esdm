@@ -1,0 +1,11 @@
+apiVersion: schema.esdm.io/event-modeling/v1
+kind: event-model
+name: shop
+scope:
+  domain: shop
+timelines:
+  - name: ordering
+    boundedContext: ordering
+    slices:
+      - place-order
+      - list-orders

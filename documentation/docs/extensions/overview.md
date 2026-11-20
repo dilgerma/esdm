@@ -6,10 +6,12 @@ Each extension is **self-contained**. It bundles its own concepts, its own refer
 
 ## Available Extensions
 
-ESDM ships two extensions today:
+ESDM ships three extensions today:
 
 - **[Domain Storytelling](/extensions/domain-storytelling/introduction.md)** captures discovery stories – Actors, Work Objects, and the activities that connect them – in the format defined by Stefan Hofer and Henning Schwentner.
 - **[Given-When-Then](/extensions/given-when-then/introduction.md)** captures behavioral scenarios about a single consistency unit (Aggregate, Dynamic Consistency Boundary, Process Manager, or Read Model) in the canonical Given/When/Then format. Each Scenario lists preceding Events, a triggering Command, Event, timer, or Query, and the expected outcome.
+
+- **[Event Modeling](/extensions/event-modeling/introduction.md)** captures the blueprint of a system – a timeline of vertical slices of four types, the screens the user acts on, and the Commands, Events, and Read Models that make them up – in the format defined by Adam Dymitruk. It refers to the core documents by name and needs no Aggregates.
 
 ## How an Extension Plugs In
 

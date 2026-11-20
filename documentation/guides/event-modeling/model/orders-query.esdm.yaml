@@ -1,0 +1,11 @@
+apiVersion: schema.esdm.io/core/v1
+kind: query
+name: list-orders
+scope:
+  domain: shop
+  boundedContext: ordering
+readModel: orders
+result:
+  type: array
+actors:
+  - customer

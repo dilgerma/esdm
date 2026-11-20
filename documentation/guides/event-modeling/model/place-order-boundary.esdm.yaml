@@ -1,0 +1,14 @@
+apiVersion: schema.esdm.io/core/v1
+kind: dynamic-consistency-boundary
+name: place-order-boundary
+scope:
+  domain: shop
+  boundedContext: ordering
+identifiedBy:
+  - name: order-id
+    source: command-payload
+    field: orderId
+consults:
+  - boundedContext: ordering
+    event: order-placed
+    criteria: An order is placed once.

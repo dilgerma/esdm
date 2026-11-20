@@ -16,9 +16,11 @@ The command writes the embedded schemas into a `schemas/` directory under the wo
 schemas/
 ├── core/
 │   └── v1.yaml
-├── given-when-then/
+├── domain-storytelling/
 │   └── v1.yaml
-└── domain-storytelling/
+├── event-modeling/
+│   └── v1.yaml
+└── given-when-then/
     └── v1.yaml
 ```
 

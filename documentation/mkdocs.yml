@@ -157,6 +157,19 @@ nav:
               - feature: extensions/given-when-then/reference/feature.md
               - scenario: extensions/given-when-then/reference/scenario.md
               - Linter Rules: extensions/given-when-then/reference/linter-rules.md
+      - Event Modeling:
+          - Introduction: extensions/event-modeling/introduction.md
+          - Concepts:
+              - Overview: extensions/event-modeling/concepts/overview.md
+              - Event Model: extensions/event-modeling/concepts/event-model.md
+              - Slice: extensions/event-modeling/concepts/slice.md
+              - Screen: extensions/event-modeling/concepts/screen.md
+          - Reference:
+              - Overview: extensions/event-modeling/reference/overview.md
+              - event-model: extensions/event-modeling/reference/event-model.md
+              - slice: extensions/event-modeling/reference/slice.md
+              - screen: extensions/event-modeling/reference/screen.md
+              - Linter Rules: extensions/event-modeling/reference/linter-rules.md
   - Ecosystem: ecosystem.md
   - Privacy Policy: https://www.thenativeweb.io/company/privacy-policy
   - Legal Notice: https://www.thenativeweb.io/company/legal-notice

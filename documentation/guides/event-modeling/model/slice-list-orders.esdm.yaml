@@ -1,0 +1,14 @@
+apiVersion: schema.esdm.io/event-modeling/v1
+kind: slice
+name: list-orders
+scope:
+  domain: shop
+  boundedContext: ordering
+type: state-view
+screen: order-list
+actors:
+  - customer
+events:
+  - order-placed
+readModel: orders
+query: list-orders

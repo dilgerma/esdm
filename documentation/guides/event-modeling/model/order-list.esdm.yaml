@@ -1,0 +1,10 @@
+apiVersion: schema.esdm.io/event-modeling/v1
+kind: screen
+name: order-list
+scope:
+  domain: shop
+  boundedContext: ordering
+actors:
+  - customer
+shows:
+  - orders

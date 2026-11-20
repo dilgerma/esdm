@@ -1,0 +1,18 @@
+apiVersion: schema.esdm.io/core/v1
+kind: read-model
+name: orders
+scope:
+  domain: shop
+  boundedContext: ordering
+schema:
+  type: array
+  items:
+    type: object
+    properties:
+      orderId: { type: string }
+      product: { type: string }
+      quantity: { type: integer }
+projections:
+  - boundedContext: ordering
+    event: order-placed
+    rule: Add a row for every order that is placed.

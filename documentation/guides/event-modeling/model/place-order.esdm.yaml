@@ -1,0 +1,18 @@
+apiVersion: schema.esdm.io/core/v1
+kind: command
+name: place-order
+scope:
+  domain: shop
+  boundedContext: ordering
+  dynamicConsistencyBoundary: place-order-boundary
+data:
+  type: object
+  properties:
+    orderId: { type: string }
+    product: { type: string }
+    quantity: { type: integer }
+  required: [orderId, product, quantity]
+publishes:
+  - order-placed
+actors:
+  - customer

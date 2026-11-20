@@ -1,0 +1,14 @@
+apiVersion: schema.esdm.io/event-modeling/v1
+kind: slice
+name: place-order
+scope:
+  domain: shop
+  boundedContext: ordering
+type: state-change
+screen: checkout
+actors:
+  - customer
+command: place-order
+dynamicConsistencyBoundary: place-order-boundary
+events:
+  - order-placed

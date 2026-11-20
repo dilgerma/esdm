@@ -14,7 +14,7 @@ The **standardization** is the point. When the format is fixed, you can build to
 
 ## Extensions
 
-Beyond the core vocabulary, ESDM ships **extension schemas** for artifacts that surround the modeling work. **Domain Storytelling** captures discovery stories – Actors, Work Objects, and the activities that connect them – as their own kind of document. **Given-When-Then** captures behavioral specifications – preceding Events, a triggering action, expected outcomes – on top of the core kinds.
+Beyond the core vocabulary, ESDM ships **extension schemas** for artifacts that surround the modeling work. **Domain Storytelling** captures discovery stories – Actors, Work Objects, and the activities that connect them – as their own kind of document. **Given-When-Then** captures behavioral specifications – preceding Events, a triggering action, expected outcomes – on top of the core kinds. **Event Modeling** captures the blueprint of a system – a timeline of slices, the screens the user acts on, and the Commands, Events, and Read Models that make them up – and refers to the core kinds by name.
 
 Each extension follows the same format conventions as the core and is validated by the same toolchain. Extensions never inject kinds into the core, and core documents never validate against an extension – the asymmetry keeps the core lean while letting the surface grow.
 
