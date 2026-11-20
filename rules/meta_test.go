@@ -74,6 +74,20 @@ func TestCatalogExtensions(t *testing.T) {
 			assert.Equalf(t, isStoryRule, isStoryExtension, "rule %s: name %q does not match extension %q", meta.ID, meta.Name(), meta.Extension)
 		}
 	})
+	// The event-modeling rules share the structure and
+	// modeling categories with the core rules; the slice-,
+	// screen- and event-model- prefixes are the only trace of
+	// their origin in the ID, so the explicit field is what
+	// keeps them off the core page.
+	t.Run("assigns exactly the slice, screen and event-model rules to the event-modeling extension", func(t *testing.T) {
+		for _, rule := range rules.Catalog() {
+			meta := rule.Meta()
+			name := meta.Name()
+			isEventModelingRule := strings.HasPrefix(name, "slice-") || strings.HasPrefix(name, "screen-") || strings.HasPrefix(name, "event-model-")
+			isEventModelingExtension := meta.Extension == "event-modeling"
+			assert.Equalf(t, isEventModelingRule, isEventModelingExtension, "rule %s: name %q does not match extension %q", meta.ID, name, meta.Extension)
+		}
+	})
 }
 
 func TestMetaDocumentationURL(t *testing.T) {
